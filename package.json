@@ -1,0 +1,338 @@
+{
+  "name": "livecode",
+  "displayName": "LiveCode for python",
+  "description": "Real-time python variable evaluation",
+  "version": "1.1.10",
+  "publisher": "xirider",
+  "engines": {
+    "vscode": "^1.31.0"
+  },
+  "categories": [
+    "Other",
+    "Debuggers"
+  ],
+  "activationEvents": [
+    "onCommand:extension.currentlivecodeSession",
+    "onCommand:extension.newlivecodeSession",
+    "onCommand:extension.newlivecodeSessionOnHighlightedCode"
+  ],
+  "main": "./out/src/extension",
+  "contributes": {
+    "menus": {
+      "editor/title": [
+        {
+          "when": "editorLangId == python && !livecode && editorHasSelection && config.livecode.showIcons",
+          "command": "extension.newlivecodeSession",
+          "alt": "extension.currentlivecodeSession",
+          "group": "navigation"
+        },
+        {
+          "when": "editorLangId == python && !livecode && !editorHasSelection && config.livecode.showIcons",
+          "command": "extension.currentlivecodeSession",
+          "alt": "extension.newlivecodeSession",
+          "group": "navigation"
+        },
+        {
+          "when": "livecode && config.livecode.showIcons",
+          "command": "extension.closelivecode",
+          "group": "navigation"
+        }
+      ],
+      "editor/title/context": [
+        {
+          "command": "extension.currentlivecodeSession"
+        },
+        {
+          "command": "extension.newlivecodeSession"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "extension.newlivecodeSessionOnHighlightedCode",
+          "when": "editorHasSelection"
+        }
+      ]
+    },
+    "configuration": {
+      "type": "object",
+      "title": "livecode configuration",
+      "properties": {
+        "livecode.showIcons": {
+          "type": "boolean",
+          "default": true
+        },
+        "livecode.skipLandingPage": {
+          "type": "boolean",
+          "default": false
+        },
+        "livecode.showFooter": {
+          "type": "boolean",
+          "default": true
+        },
+        "livecode.customCSS": {
+          "type": "string",
+          "default": null,
+          "description": "injected into livecode each run. Use 'Developer: Open Webview Developer Tools' command to inspect livecode html"
+        },
+        "livecode.delay": {
+          "type": "number",
+          "default": 300,
+          "description": "delay in milliseconds before executing code after typing"
+        },
+        "livecode.restartDelay": {
+          "type": "number",
+          "default": 300,
+          "description": "when restart mode is active we add this to delay to delay longer"
+        },
+        "livecode.inlineResults": {
+          "type": "boolean",
+          "default": false,
+          "description": "whether to show errors / results / prints inline. (Currently just error icons)"
+        },
+        "livecode.pyGuiLibraries": {
+          "type": "array",
+          "default": [
+            "matplotlib",
+            "tkinter",
+            "kivy",
+            "pyforms",
+            "PyQt4",
+            "PyQt5",
+            "wx",
+            "pyside",
+            "plotly",
+            "ggplot",
+            "bokeh",
+            "ppb",
+            "PySimpleGUI",
+            "pyglet"
+          ],
+          "description": "livecode enters restart mode when one of these libraries are imported. Process is restarted at end of each run so GUI window is updated"
+        },
+        "livecode.whenToExecute": {
+          "type": "string",
+          "enum": [
+            "afterDelay",
+            "onSave",
+            "onKeybinding"
+          ],
+          "enumDescriptions": [
+            "after a delay (change livecode.delay to control the amount)",
+            "on save",
+            "on keyboard shortcut"
+          ],
+          "default": "afterDelay",
+          "description": "When to execute your code"
+        },
+        "livecode.show_to_level": {
+          "type": "number",
+          "default": 5,
+          "description": "2 shows x=1 and x=[1,2], provides option to expand deeply nested data like x=[[1]]"
+        },
+        "livecode.max_string_length": {
+          "type": "number",
+          "default": 70,
+          "description": "strings over X characters are truncated with an option to expand"
+        },
+        "livecode.printResultPlacement": {
+          "type": "string",
+          "enum": [
+            "top",
+            "bottom"
+          ],
+          "enumDescriptions": [
+            "print results appear on top",
+            "print results appear on bottom"
+          ],
+          "default": "bottom"
+        },
+        "livecode.pythonPath": {
+          "type": "string",
+          "default": null,
+          "description": "livecode uses the path you have defined in the official python extension. If not present then this setting will be used. If this setting is also empty then on windows py will be used, or python3 otherwise"
+        },
+        "livecode.envFile": {
+          "type": "string",
+          "default": null,
+          "description": "Absolute path to a file containing environment variable definitions. If not set the setting from the python extension will be used, or ${workspaceFolder}/.env if the python extension is not installed"
+        },
+        "livecode.pythonOptions": {
+          "type": "array",
+          "default": [
+            "-u"
+          ],
+          "description": "default -u to see prints in real-time. See https://docs.python.org/3/using/cmdline.html#miscellaneous-options for other options. Changing this setting not reccomended"
+        },
+        "livecode.defaultFilterVars": {
+          "type": "array",
+          "default": [],
+          "description": "Any variables with these names are not shown in livecode variable view. You can use the livecode_filter variable in livecode to play around with this setting in real-time"
+        },
+        "livecode.defaultFilterTypes": {
+          "type": "array",
+          "default": [
+            "<class 'module'>",
+            "<class 'function'>"
+          ],
+          "description": "Any variables with these types are not shown in livecode variable view. You can use the livecode_filter_type variable in livecode to play around with this setting in real-time"
+        },
+        "livecode.defaultImports": {
+          "type": "array",
+          "default": [
+            "from livecode_dump import dump"
+          ],
+          "description": "Default imports for new livecode sessions. dump is included by default so you can use it to inspect variables & local scopes"
+        },
+        "livecode.unsafeKeywords": {
+          "type": "array",
+          "default": [
+            "rmdir\\(",
+            "rmtree\\("
+          ],
+          "description": "livecode will not evaulate your code in real-time mode if one of these keywords are detected. Keywords are applied via regex."
+        },
+        "livecode.telemetry": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether to report useful anonymous data back to developer."
+        },
+        "livecode.showSyntaxErrors": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether to show syntax errors."
+        },
+        "livecode.showNameErrors": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether to show name errors."
+        },
+        "livecode.showGlobalVars": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether to show global vars. Potential speed improvement if turned off - you can still inspect vars with dump()"
+        },
+        "livecode.shell_plus": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether to automatically load django models. This setting doesn't actually do anything yet. See https://github.com/Almenon/livecode-vscode/issues/279"
+        },
+        "livecode.keepPreviousVars": {
+          "type": "boolean",
+          "default": false,
+          "description": "If set to true livecode will add onto the local state each run instead of clearing it and starting fresh."
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "extension.currentlivecodeSession",
+        "title": "eval python in real time (current doc)",
+        "category": "livecode",
+        "icon": "./media/livecode-activate.png"
+      },
+      {
+        "command": "extension.newlivecodeSession",
+        "title": "eval python in real time (new doc)",
+        "category": "livecode",
+        "icon": "./media/livecode-activate.png"
+      },
+      {
+        "command": "extension.closelivecode",
+        "title": "closes livecode",
+        "category": "livecode",
+        "icon": "./media/livecode-stop.png"
+      },
+      {
+        "command": "extension.newlivecodeSessionOnHighlightedCode",
+        "title": "open highlighted code in new livecode session",
+        "category": "livecode"
+      },
+      {
+        "command": "extension.executelivecode",
+        "title": "trigger a run in the current livecode session",
+        "category": "livecode"
+      },
+      {
+        "command": "extension.executelivecodeBlock",
+        "title": "execute the current block of code",
+        "category": "livecode"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "extension.currentlivecodeSession",
+        "key": "ctrl+shift+a",
+        "mac": "cmd+shift+a",
+        "when": "!inQuickOpen && !terminalFocus"
+      },
+      {
+        "command": "extension.newlivecodeSession",
+        "key": "ctrl+shift+q",
+        "mac": "cmd+shift+r",
+        "when": "!inQuickOpen && !terminalFocus"
+      },
+      {
+        "command": "extension.executelivecode",
+        "key": "ctrl+shift+;",
+        "mac": "cmd+shift+;",
+        "when": "!inQuickOpen && !terminalFocus && editorLangId == python"
+      },
+      {
+        "command": "extension.executelivecodeBlock",
+        "key": "ctrl+enter",
+        "mac": "cmd+enter",
+        "when": "editorTextFocus && editorLangId == python"
+      },
+      {
+        "command": "extension.printDir",
+        "key": "alt+enter",
+        "mac": "alt+enter",
+        "when": "editorTextFocus && editorLangId == python"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "tsc -p ./",
+    "compile": "tsc -watch -p ./",
+    "compileOnce": "tsc -p ./",
+    "test": "tsc -p ./ && node ./out/test/runTest.js",
+    "unitTests": "mocha -ui tdd -r ts-node/register test/*.spec.ts",
+    "visualize": "depcruise --exclude 'vscode|^[a-zA-Z0-9\\_]+$' --output-type dot src | dot -T svg > dependencygraph.svg"
+  },
+  "devDependencies": {
+    "@types/glob": "^7.1.1",
+    "@types/mocha": "^5.2.6",
+    "@types/node": "^10.5.2",
+    "@types/vscode": "^1.31.0",
+    "decache": "^4.4.0",
+    "glob": "^7.1.4",
+    "mocha": "^6.1.4",
+    "source-map-support": "^0.5.13",
+    "ts-node": "^8.6.2",
+    "typescript": "^3.7.5",
+    "vscode-test": "^1.3.0"
+  },
+  "dependencies": {
+    "arepl-backend": "^1.3.8",
+    "opn": "^5.3.0",
+    "path": "^0.12.7",
+    "vscode-extension-telemetry": "0.1.2"
+  },
+  "bugs": {
+    "url": "https://github.com/xirider/livecode/issues",
+    "email": ""
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/xirider/livecode.git"
+  },
+  "license": "SEE LICENSE IN <filename>",
+  "keywords": [
+    "python",
+    "real-time",
+    "display",
+    "variable",
+    "explorer"
+  ],
+  "icon": "media/livecode-store.png"
+}
