@@ -2,7 +2,7 @@
 
 LiveCode evaluates your python code while you type and displays variable values for each line.
 
-![demo gif](https://raw.githubusercontent.com/Almenon/LiveCode/master/livecode_example.gif)
+![demo gif](https://raw.githubusercontent.com/Xirider/LiveCode/master/livecode_example.gif)
 
 LiveCode is available for free on the vscode [marketplace](https://marketplace.visualstudio.com/items?itemName=xirider.LiveCode#overview).
 
