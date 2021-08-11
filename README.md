@@ -88,4 +88,4 @@ You can also use control-enter to run a block of code outside `#$end`.
 
 ## Credits
 
-This extension is based on the awesome [AREPL VSCode extension](https://github.com/Almenon/arepl-vscode) from Almenon.
+This extension is based on a fork of the awesome [AREPL VSCode extension](https://github.com/Almenon/arepl-vscode) from Almenon.
