@@ -326,7 +326,6 @@
     "type": "git",
     "url": "https://github.com/xirider/livecode.git"
   },
-  "license": "SEE LICENSE IN <filename>",
   "keywords": [
     "python",
     "real-time",
